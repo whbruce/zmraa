@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <misc/shell.h>
+#include <shell/shell.h>
 #include "mraa/common.h"
 #include "gpio-cmd.h"
 #include "i2c-cmd.h"
@@ -37,13 +37,14 @@ print_version()
     printf("Version %s on %s\n", mraa_get_version(), mraa_get_platform_name());
 }
 
-static void
+static int
 shell_cmd_version(int argc, char* argv[])
 {
     print_version();
+    return 0;
 }
 
-static void
+static int
 shell_cmd_gpio(int argc, char* argv[])
 {
     argc--;
@@ -66,20 +67,22 @@ shell_cmd_gpio(int argc, char* argv[])
         }
     } else
         printf("Must specify gpio command. \n");
+    return 0;
 }
 
-static void
+static int
 shell_cmd_i2c(int argc, char* argv[])
 {
     i2c_process_command(argc, argv);
+    return 0;
 }
 
 
 
-const struct shell_cmd commands[] = { { "version", shell_cmd_version },
-                                      { "gpio", shell_cmd_gpio },
-                                      { "i2c", shell_cmd_i2c },
-                                      { NULL, NULL } };
+const struct shell_cmd commands[] = { { "version", shell_cmd_version, NULL },
+                                      { "gpio", shell_cmd_gpio, NULL },
+                                      { "i2c", shell_cmd_i2c, NULL },
+                                      { NULL, NULL, NULL } };
 
 void
 main(void)
@@ -87,7 +90,7 @@ main(void)
     mraa_result_t status = mraa_init();
     if (status == MRAA_SUCCESS) {
         print_version();
-        shell_init("mraa> ", commands);
+        SHELL_REGISTER("mraa> ", commands);
     } else {
         printf("mraa_init() failed with error code %d\n", status);
     }
