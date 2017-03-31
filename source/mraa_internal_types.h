@@ -91,6 +91,7 @@ struct _spi {
     struct spi_config* config; /**< struct to hold the SPI configurations */
     struct device* zdev;       /**< Zephyr device driver object */
     struct device* pinmux_dev; /**< pinmux device driver object */
+    struct _gpio* cs_gpio;
     /*@}*/
 };
 
@@ -226,6 +227,7 @@ typedef struct {
     uint8_t mosi;              /**< Master Out, Slave In. */
     uint8_t miso;              /**< Master In, Slave Out. */
     uint8_t cs;                /**< Chip Select, used when the board is a spi slave */
+    mraa_boolean_t sw_cs;      /**< Is software needed to control chip select ? */
     /*@}*/
 } mraa_spi_bus_t;
 

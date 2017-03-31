@@ -185,6 +185,22 @@ mraa_result_t mraa_spi_lsbmode(mraa_spi_context dev, mraa_boolean_t lsb);
 mraa_result_t mraa_spi_bit_per_word(mraa_spi_context dev, unsigned int bits);
 
 /**
+ * If softeware control is required, enable chip select
+ *
+ * @param dev The Spi context
+ * @return Result of operation
+ */
+mraa_result_t mraa_spi_cs_enable(mraa_spi_context dev);
+
+/**
+ * If softeware control is required, disable chip select
+ *
+ * @param dev The Spi context
+ * @return Result of operation
+ */
+mraa_result_t mraa_spi_cs_disable(mraa_spi_context dev);
+
+/**
  * De-inits an mraa_spi_context device
  *
  * @param dev The Spi context

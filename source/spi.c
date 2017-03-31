@@ -36,6 +36,7 @@
 #include <zephyr.h>
 
 #include "mraa/spi.h"
+#include "mraa/gpio.h"
 
 #if defined(CONFIG_STDOUT_CONSOLE)
 #include <stdio.h>
@@ -67,7 +68,22 @@ typedef struct spi_config* spi_config_ptr;
 mraa_spi_context
 mraa_spi_init(int bus)
 {
+    if (bus >= plat->spi_bus_count) {
+        return NULL;
+    }
+
     mraa_spi_context dev = (mraa_spi_context) malloc(sizeof(struct _spi));
+
+    if (plat->spi_bus[bus].sw_cs) {
+        dev->cs_gpio = mraa_gpio_init(plat->spi_bus[bus].cs);
+        if (dev->cs_gpio == NULL)
+            return NULL;
+        if (mraa_gpio_dir(dev->cs_gpio, MRAA_GPIO_OUT) != MRAA_SUCCESS) {
+            return NULL;
+        }
+    }
+
+
 
 // SPI is available by default on the ARC core
 #if defined(CONFIG_BOARD_ARDUINO_101)
@@ -179,7 +195,7 @@ mraa_spi_write(mraa_spi_context dev, uint8_t data)
     if (ret == 0) {
         return ret_data;
     }
-
+printf("spi_transceive error %d\n", (int)ret);
     return -1;
 }
 
@@ -274,6 +290,29 @@ mraa_spi_transfer_buf_word(mraa_spi_context dev, uint16_t* data, uint16_t* rxbuf
     }
 
     return ret;
+}
+
+// mraa_result_t
+//mraa_spi_cs_enable(mraa_spi_context dev)
+
+mraa_result_t
+mraa_spi_cs_enable(mraa_spi_context dev)
+{
+    if (dev->cs_gpio == NULL) {
+        return MRAA_ERROR_INVALID_RESOURCE;
+    } else {
+        return mraa_gpio_write(dev->cs_gpio, 0);
+    }
+}
+
+mraa_result_t
+mraa_spi_cs_disable(mraa_spi_context dev)
+{
+    if (dev->cs_gpio == NULL) {
+        return MRAA_ERROR_INVALID_RESOURCE;
+    } else {
+        return mraa_gpio_write(dev->cs_gpio, 1);
+    }
 }
 
 mraa_result_t
