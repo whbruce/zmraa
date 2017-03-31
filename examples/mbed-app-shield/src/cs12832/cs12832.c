@@ -156,7 +156,7 @@ void cs12832_init(int bus, int lcd_a0_pin, int lcd_reset_pin)
         return;
     }
 
-    if (mraa_spi_frequency(spi, 5000000) != MRAA_SUCCESS) {
+    if (mraa_spi_frequency(spi, 15000000) != MRAA_SUCCESS) {
         printf("mraa_spi_frequency failed\n");
         return;
     }
