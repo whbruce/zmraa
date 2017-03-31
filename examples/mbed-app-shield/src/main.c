@@ -33,7 +33,6 @@
 
 #define GPIO_SW_CENTER                   4
 #define GPIO_SW_LED                      5
-#define GPIO_SPI_CS                     10
 #define GPIO_LCD_A0                      7
 #define GPIO_LCD_RESET                  12
 
@@ -133,23 +132,20 @@ main(void)
 #endif
 
     cs12832_init(0, GPIO_LCD_A0, GPIO_LCD_RESET);
-    int lcd_value = 1;
+    c12832_set_auto_up(1);
+    c12832_cls();
+    c12832_locate(0,0);
+    c12832_puts("Hello");
+    c12832_locate(0,9);
+    c12832_puts("World");
 
     mraa_boolean_t led_on = 1;
     while (1) {
         // get_temperature(i2c);
-/*
-        if (gpio_sw_center) {
-            printf("sw_center=%d\n", mraa_gpio_read(gpio_sw_center));
-        }
-*/
         if (gpio_sw_led) {
             mraa_gpio_write(gpio_sw_led, led_on);
         }
         led_on = !led_on;
-
-        cs12832_fill(lcd_value++);
-
         k_sleep(1000);
     }
 }
