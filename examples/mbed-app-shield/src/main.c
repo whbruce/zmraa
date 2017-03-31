@@ -25,8 +25,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <nanokernel.h>
+#include <kernel.h>
 #include "mraa.h"
+#include "cs12832/cs12832.h"
 
 #define SLEEPTICKS  SECONDS(1)
 
@@ -34,6 +35,7 @@
 #define GPIO_SW_LED                      5
 #define GPIO_SPI_CS                     10
 #define GPIO_LCD_A0                      7
+#define GPIO_LCD_RESET                  12
 
 #define LM75B_ADDRESS                   0x48
 #define LM75B_REGISTER_TEMPERATURE      0x00
@@ -42,88 +44,9 @@
 #define LM75B_CONFIG_SHUTDOWN_POWERON   0x00
 #define LM75B_CONFIG_SHUTDOWN_SHUTDOWN  0x01
 
-mraa_spi_context spi;
-mraa_gpio_context gpio_spi_cs;
-mraa_gpio_context gpio_lcd_a0;
 
 
-/*
-void lcd_wr_cmd(unsigned char cmd)
-{
-    _A0 = 0;
-    _CS = 0;
-    _spi.write(cmd);
-    _CS = 1;
-}
-*/
-
-// write data to lcd controller
-/*
-void lcd_wr_dat(unsigned char dat)
-{
-    _A0 = 1;
-    _CS = 0;
-    _spi.write(dat);
-    _CS = 1;
-}
-*/
-// reset and init the lcd controller
-
-void lcd_reset()
-{
-    gpio_spi_cs = mraa_gpio_init(GPIO_SPI_CS);
-    if (gpio_spi_cs == NULL) {
-        printf("Could not open GPIO_SPI_CS gpio\n");
-        return;
-    }
-
-    gpio_lcd_a0 = mraa_gpio_init(GPIO_LCD_A0);
-    if (gpio_lcd_a0 == NULL) {
-        printf("Could not open GPIO_SPI_CS gpio\n");
-        return;
-    }
-
-    spi = mraa_spi_init(0);
-    if (spi == NULL) {
-        printf("Could not open SPI\n");
-        return;
-    }
-
-    if (mraa_spi_mode(spi, MRAA_SPI_MODE3) != MRAA_SUCCESS) {
-        printf("mraa_spi_mode failed\n");
-        return;
-
-    }
-
-    if (mraa_spi_bit_per_word(spi, 8) != MRAA_SUCCESS) {
-        printf("mraa_spi_bit_per_word failed\n");
-        return;
-    }
-
-    if (mraa_spi_frequency(spi, 20000000) != MRAA_SUCCESS) {
-        printf("mraa_spi_frequency failed\n");
-        return;
-    }
-
-    printf("lcd_reset ok\n");
-/*
-    _spi.format(8,3);                 // 8 bit spi mode 3
-    _spi.frequency(20000000);          // 19,2 Mhz SPI clock
-    _A0 = 0;
-    _CS = 1;
-    _reset = 0;                        // display reset
-    wait_us(50);
-    _reset = 1;                       // end reset
-    wait_ms(5);
-    wr_cmd(0xAE);   //  display off
-*/
-}
-
-static void init_lcd()
-{
-
-}
-
+#if CONFIG_MRAA_I2C_COUNT > 0
 static void
 get_temperature(mraa_i2c_context i2c)
 {
@@ -145,6 +68,7 @@ get_temperature(mraa_i2c_context i2c)
     int temperature = regValue & 0xFF;
     printf("Temperature = %d\n", temperature);
 }
+#endif
 
 static void
 gpio_isr_handler(void* args)
@@ -201,12 +125,15 @@ main(void)
     if (gpio_sw_led == NULL) {
         printf("mraa_gpio_init for pin %d failed\n", GPIO_SW_LED);
     }
+#if CONFIG_MRAA_I2C_COUNT > 0
     mraa_i2c_context i2c = mraa_i2c_init(0);
     if (i2c == NULL) {
         printf("mraa_i2c_init failed\n");
     }
+#endif
 
-    lcd_reset();
+    cs12832_init(0, GPIO_LCD_A0, GPIO_LCD_RESET);
+    int lcd_value = 1;
 
     mraa_boolean_t led_on = 1;
     while (1) {
@@ -220,8 +147,9 @@ main(void)
             mraa_gpio_write(gpio_sw_led, led_on);
         }
         led_on = !led_on;
-        // nano_timer_start(&timer, SLEEPTICKS);
-        // nano_timer_test(&timer, TICKS_UNLIMITED);
+
+        cs12832_fill(lcd_value++);
+
         k_sleep(1000);
     }
 }
