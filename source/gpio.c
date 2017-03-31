@@ -123,6 +123,8 @@ mraa_gpio_init(int pin)
     } else if (pin == 5) {
         pinmux_pin_set(pinmux_dev, 64, PINMUX_FUNC_C);
         mraa_set_pininfo(board, 5, 15, "IO5", (mraa_pincapabilities_t){ 1, 1, 1, 0, 0, 0, 0, 0 });
+    } else if (pin == 7) {
+        pinmux_pin_set(pinmux_dev, 0, PINMUX_FUNC_A);
     } else if (pin == 10) {
         pinmux_pin_set(pinmux_dev, 0, PINMUX_FUNC_A);
     } else if (pin == 11) {
