@@ -142,14 +142,8 @@ mraa_board_t* mraa_intel_arduino_101()
     mraa_set_pininfo(b, 15,  0, "A1  ", (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 });
     mraa_set_pininfo(b, 16,  0, "A2  ", (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 });
     mraa_set_pininfo(b, 17,  0, "A3  ", (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 });
-    mraa_set_pininfo(b, 18, 14, "A4  ", (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 1, 0, 0 });
-    mraa_set_pininfo(b, 19,  9, "A5  ", (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 1, 0, 0 });
-    b->def_i2c_bus = 0;
-    b->i2c_bus[0].bus_id = 0;
-    b->pins[18].i2c.mux_total = 0;
-    b->pins[19].i2c.mux_total = 0;
-    b->i2c_bus[0].sda = 18;
-    b->i2c_bus[0].scl = 19;
+    mraa_set_pininfo(b, 18, 14, "A4  ", (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 });
+    mraa_set_pininfo(b, 19,  9, "A5  ", (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 });
 #if defined (CONFIG_SPI_0)
     b->spi_bus[0].bus_id = 0;
 #elif defined (CONFIG_SPI_1)
@@ -161,6 +155,7 @@ mraa_board_t* mraa_intel_arduino_101()
     b->spi_bus[0].mosi = 11;
     b->spi_bus[0].miso = 12;
     b->spi_bus[0].cs = 10;
+    b->spi_bus[0].sw_cs = 1;
 
     int i2c_raw_gpios[] = { 9, 14, 24, 25 };
     struct device* zdev = device_get_binding("GPIO_0");
